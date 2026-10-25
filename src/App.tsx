@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import { Brain, Therapist, Archive } from './components/3d';
-import { EEGInterface, TherapyInterface, AnalyticsInterface } from './components/instruments';
+import { EEGInterface, TherapyInterface, ModelInterface } from './components/instruments';
 import { useEEGStore, useUserStore } from './stores';
 import { Button } from './components/ui/Button';
 import type { Instrument } from './types';
-import { ChevronDown, Zap, Sparkles, Activity, MessageCircle, BarChart3 } from 'lucide-react';
+import { ChevronDown, Zap, Sparkles, Activity, MessageCircle, FlaskConical } from 'lucide-react';
 
 // Scroll sections configuration
 const SECTIONS = [
@@ -31,11 +31,11 @@ const SECTIONS = [
   { 
     id: 'archive', 
     instrument: 'archive' as Instrument, 
-    title: 'Archive', 
-    subtitle: 'Analytics & Care', 
-    description: 'Your neural journey',
-    icon: BarChart3,
-    color: '#9D00FF',
+    title: 'Model', 
+    subtitle: 'Prediction Model', 
+    description: 'Our EEG research model, running in your browser',
+    icon: FlaskConical,
+    color: '#FFD60A',
   },
 ];
 
@@ -363,8 +363,9 @@ function App() {
         <TherapyInterface onBack={handleBack} />
       )}
       
+      {/* The archive scene is now the research prediction model */}
       {expandedInstrument === 'archive' && (
-        <AnalyticsInterface onBack={handleBack} />
+        <ModelInterface onBack={handleBack} />
       )}
     </div>
   );

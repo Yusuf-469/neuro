@@ -27,6 +27,18 @@ A complete EEG toolkit with real-time brain monitoring, AI-powered therapy, and 
 - AI-generated insights
 - Data export (CSV/PDF)
 
+### 🔬 Model - Research Prediction Model
+- XGBoost classifier (healthy control vs mood disorder) trained on the public BRMH EEG dataset
+- Runs in the browser: the exported trees score 73 held-out subjects (80.82% on the project report's split)
+- Honest evaluation: 10 x 5-fold cross-validation, balanced accuracy and ROC-AUC shown next to the held-out score
+- Per-subject SHAP contributions and the four EEG biomarkers vs group medians
+- Educational research demo, not a diagnostic tool
+
+### AI Therapist setup
+The therapist chat calls `/api/therapist`, a Vercel Edge Function that talks to OpenRouter.
+Set `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`) in the Vercel project settings.
+Without a key, the chat falls back to clearly labelled scripted replies.
+
 ## Tech Stack
 
 | Layer | Technology |

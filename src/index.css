@@ -22,11 +22,13 @@
   --font-sans: 'SF Pro', 'Inter', system-ui, sans-serif;
 }
 
-/* Base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Base styles (in the base layer, so Tailwind's spacing utilities can override them) */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
 html {

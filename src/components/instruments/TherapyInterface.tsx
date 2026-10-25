@@ -6,6 +6,7 @@ import { Therapist } from '../3d';
 import { useTherapistStore, useEEGStore, useUserStore } from '../../stores';
 import { IconButton } from '../ui/Button';
 import type { TherapyMessage } from '../../types/firebase';
+import { askTherapist, CRISIS, CRISIS_REPLY } from '../../lib/therapistApi';
 
 interface TherapyInterfaceProps {
   onBack: () => void;
@@ -62,12 +63,20 @@ export function TherapyInterface({ onBack }: TherapyInterfaceProps) {
     setTyping(true);
     
     try {
-      // Simulate AI response (replace with actual DeepSeek API call)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Real AI reply from the /api/therapist serverless function (the key stays server-side)
+      const text = inputText.trim();
+      const history = [...messages, { role: 'user' as const, content: text }];
+      const reply = await askTherapist(history, { dominant: dominantState, quality: signalQuality });
+
       const aiResponse: Omit<TherapyMessage, 'id' | 'timestamp'> = {
         role: 'assistant',
-        content: generateAIResponse(inputText.trim(), dominantState),
+        content:
+          reply ??
+          (CRISIS.test(text)
+            ? CRISIS_REPLY
+            : `${signalQuality > 0 ? generateAIResponse(text, dominantState) : "I'm here and listening. Tell me a little more about what's on your mind?"}
+
+(Offline: a scripted reply, because the AI service is unavailable right now.)`),
       };
       
       addMessage(aiResponse);
@@ -76,7 +85,7 @@ export function TherapyInterface({ onBack }: TherapyInterfaceProps) {
     } finally {
       setTyping(false);
     }
-  }, [inputText, isTyping, dominantState, signalQuality, addMessage, setTyping]);
+  }, [inputText, isTyping, messages, dominantState, signalQuality, addMessage, setTyping]);
   
   // Handle voice input
   const toggleRecording = useCallback(() => {
@@ -304,7 +313,7 @@ export function TherapyInterface({ onBack }: TherapyInterfaceProps) {
                     `}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.content}</p>
                     
                     {/* EEG context for user messages */}
                     {message.role === 'user' && message.eegContext && (

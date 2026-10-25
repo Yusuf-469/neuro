@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { askTherapist } from '../lib/therapistApi';
 import { subscribeWithSelector } from 'zustand/middleware';
 import type { TherapyConversation, TherapyMessage, EEGContext } from '../types/firebase';
 import { collection, addDoc, updateDoc, doc, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
@@ -210,50 +211,15 @@ export const useTherapistStore = create<TherapistState>()(
       }
     },
     
-    // Get AI response from DeepSeek API
+    // Get AI response from the /api/therapist serverless function (the key stays server-side)
     getAIResponse: async (userMessage: string) => {
-      const { messages, systemPrompt, temperature } = get();
+      const { messages } = get();
       const eegStore = useEEGStore.getState();
-      
-      // Build context with EEG state
-      let contextMessage = userMessage;
-      if (eegStore.currentData) {
-        contextMessage += `\n\n[Current EEG State: ${eegStore.currentData.dominant.toUpperCase()} dominant, Quality: ${eegStore.currentData.quality}%, Coherence: ${eegStore.currentData.coherence.toFixed(2)}]`;
-      }
-      
-      // Call DeepSeek API
-      const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
-      
-      if (!apiKey) {
-        // Return a simulated response if no API key
-        return simulateAIResponse(userMessage, eegStore.currentData);
-      }
-      
-      try {
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'deepseek-chat',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              ...messages.map(m => ({ role: m.role, content: m.content })),
-              { role: 'user', content: contextMessage },
-            ],
-            temperature,
-            max_tokens: 500,
-          }),
-        });
-        
-        const data = await response.json();
-        return data.choices[0]?.message?.content || 'I apologize, I could not process your message.';
-      } catch (error) {
-        console.error('DeepSeek API error:', error);
-        return simulateAIResponse(userMessage, eegStore.currentData);
-      }
+      const reply = await askTherapist(
+        [...messages, { role: 'user', content: userMessage }],
+        eegStore.currentData ? { dominant: eegStore.currentData.dominant, quality: eegStore.currentData.quality } : undefined,
+      );
+      return reply ?? simulateAIResponse(userMessage, eegStore.currentData);
     },
   }))
 );
