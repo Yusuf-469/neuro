@@ -36,7 +36,7 @@ A complete EEG toolkit with real-time brain monitoring, AI-powered therapy, and 
 
 ### AI Therapist setup
 The therapist chat calls `/api/therapist`, a Vercel Edge Function that talks to OpenRouter.
-Set `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`) in the Vercel project settings. By default the therapist uses free OpenRouter models (`google/gemma-4-31b-it:free`, falling back to `nvidia/nemotron-3.5-lightning:free` and `google/gemma-4-26b-a4b-it:free`), so it costs nothing to run.
+Set `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`) in the Vercel project settings. By default the therapist uses free OpenRouter models (`nvidia/nemotron-3.5-lightning:free`, falling back to `google/gemma-4-31b-it:free` and `google/gemma-4-26b-a4b-it:free`), so it costs nothing to run.
 Without a key, the chat falls back to clearly labelled scripted replies.
 
 ## Tech Stack

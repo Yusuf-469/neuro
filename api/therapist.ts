@@ -17,7 +17,7 @@ const MAX_CHARS = 1200;
 
 type Turn = { role: 'user' | 'assistant'; content: string };
 
-const FREE_MODELS = ['google/gemma-4-31b-it:free', 'nvidia/nemotron-3.5-lightning:free', 'google/gemma-4-26b-a4b-it:free'];
+const FREE_MODELS = ['nvidia/nemotron-3.5-lightning:free', 'google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free'];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -65,8 +65,10 @@ export default async function handler(req: Request): Promise<Response> {
       body: JSON.stringify({
         models: models.slice(0, 3),
         messages: [{ role: 'system', content: system }, ...history],
-        max_tokens: 350,
+        max_tokens: 500,
         temperature: 0.7,
+        // reply directly; a "thinking" model could otherwise spend the whole budget before answering
+        reasoning: { enabled: false },
       }),
     });
   } catch {
